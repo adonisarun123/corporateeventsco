@@ -118,6 +118,8 @@ export function StatsStrip({
 export function Card({
   href,
   imgSrc,
+  imgSrcSet,
+  imgSizes = "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 90vw",
   imgAlt,
   tag,
   title,
@@ -125,7 +127,12 @@ export function Card({
   meta,
 }: {
   href?: string;
+  /** Default image URL — should be a small (~600w) thumbnail. */
   imgSrc: string;
+  /** Optional srcset across breakpoints for responsive loading. */
+  imgSrcSet?: string;
+  /** sizes hint for the browser (only applies when srcSet is provided). */
+  imgSizes?: string;
   imgAlt: string;
   tag?: string;
   title: string;
@@ -134,13 +141,16 @@ export function Card({
 }) {
   const inner = (
     <div className="card-lift">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-line">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gradient-to-br from-cream to-line">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imgSrc}
+          srcSet={imgSrcSet}
+          sizes={imgSrcSet ? imgSizes : undefined}
           alt={imgAlt}
           className="h-full w-full object-cover"
           loading="lazy"
+          decoding="async"
         />
         {tag && (
           <span className="absolute top-3 left-3 rounded-full bg-white/95 backdrop-blur px-3 py-1 text-[11px] font-semibold tracking-wide text-ink">

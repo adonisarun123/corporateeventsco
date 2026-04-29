@@ -8,6 +8,35 @@
 
 export type DestCategory = "metro" | "ncr" | "tier2" | "getaway";
 
+/**
+ * Visual category — maps to an image in our curated bank.
+ * Multiple destinations can share a visual category when they have
+ * the same kind of scenery (e.g. plantation hill stations all use
+ * COFFEE_PLANTATION). The bank is in lib/images.ts.
+ */
+export type VisualKind =
+  | "URBAN_INDIA" // generic Indian metropolitan skyline
+  | "DELHI_INDIA_GATE" // India Gate / heritage Delhi
+  | "MUMBAI_GATEWAY" // Gateway of India / Marine Drive
+  | "BANGALORE_CITY" // Bangalore skyline / Vidhana Soudha
+  | "HYDERABAD_CHARMINAR" // Charminar / Hyderabad
+  | "CHENNAI_COAST" // Marina Beach / Chennai
+  | "KOLKATA_HOWRAH" // Howrah Bridge / Kolkata
+  | "JAIPUR_HAWA_MAHAL" // Pink City / heritage Rajasthan
+  | "DESERT_DUNES" // Jaisalmer / desert
+  | "BACKWATERS" // Kerala backwaters
+  | "BEACH_PALMS" // Goa / coastal palms
+  | "TEA_ESTATE" // Munnar / Ooty tea hills
+  | "COFFEE_PLANTATION" // Coorg / Chikmagalur / Wayanad
+  | "WESTERN_GHATS" // hills, fog, forest
+  | "GREEN_HILLS" // Lonavala / Mahabaleshwar / Nandi
+  | "RIVER_HIMALAYA" // Rishikesh / Ganga
+  | "SNOW_MOUNTAINS" // Manali / Himalayas
+  | "FOREST_WILDLIFE" // Kabini / Pench / Tadoba
+  | "TEMPLE_HERITAGE" // Bhubaneswar / temple architecture
+  | "HERITAGE_PALACE" // Lucknow / Mysore palaces
+  | "MODERN_OFFICE"; // Gurgaon / Cyber Hub / GCC corridors
+
 export type Destination = {
   slug: string;
   name: string;
@@ -16,8 +45,8 @@ export type Destination = {
   state: string;
   /** One-line tagline used on cards and hero */
   tagline: string;
-  /** Hero image (Unsplash) */
-  hero: string;
+  /** Maps to a curated, verified image in IMG_BANK */
+  visual: VisualKind;
   /** 2–3 short paragraphs */
   intro: string[];
   /** Bullets — why corporate programs work well here */
@@ -38,9 +67,6 @@ export type Destination = {
   faqs: { q: string; a: string }[];
 };
 
-const u = (id: string, w = 1600) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
-
 export const DESTINATIONS: Destination[] = [
   /* =========================================================================
    * MAJOR METROS
@@ -51,7 +77,7 @@ export const DESTINATIONS: Destination[] = [
     category: "metro",
     state: "Karnataka",
     tagline: "Corporate events for India's tech capital.",
-    hero: u("photo-1596176530529-78163a4f7af2"),
+    visual: "BANGALORE_CITY",
     intro: [
       "Bangalore is our home market and the largest single source of corporate event bookings in India. We run more programs here every quarter than in any other city — for IT and ITES teams, growth-stage companies, large GCCs, and the campus-hire batches that arrive every July.",
       "What works in Bangalore is shaped by what the teams actually look like: distributed across several offices, with significant remote and hybrid populations, and a calendar that's perpetually compressed by sprint cycles. The right program respects that.",
@@ -126,7 +152,7 @@ export const DESTINATIONS: Destination[] = [
     category: "metro",
     state: "Delhi NCR",
     tagline: "Programs for the country's largest corporate cluster.",
-    hero: u("photo-1587474260584-136574528ed5"),
+    visual: "DELHI_INDIA_GATE",
     intro: [
       "Delhi and the surrounding NCR cities form the country's largest concentration of corporate offices — BFSI head offices, consulting practices, large global GCCs, and a heavy public-sector presence. The variety of program needs is unusually wide.",
       "Programs here have to respect the realities of the city: heavy traffic patterns that influence schedule design, a compressed comfortable-weather window, and the genuine logistics gap between south Delhi, central Delhi, and the NCR satellites.",
@@ -200,7 +226,7 @@ export const DESTINATIONS: Destination[] = [
     category: "metro",
     state: "Maharashtra",
     tagline: "Programs designed around Mumbai's unique time pressure.",
-    hero: u("photo-1570168007204-dfb528c6958f"),
+    visual: "MUMBAI_GATEWAY",
     intro: [
       "Mumbai's corporate landscape is unusual: extreme density, time-scarce employees, and a city geography that turns any 25 km journey into a half-day commitment. Programs that work here are designed around those realities — not in spite of them.",
       "The city's strongest categories are BFSI, media, consumer goods and the rapidly-growing GCC cluster in BKC and Powai. Each has a different temperature, but a shared expectation: don't waste time.",
@@ -273,7 +299,7 @@ export const DESTINATIONS: Destination[] = [
     category: "metro",
     state: "Telangana",
     tagline: "Programs for Hyderabad's fast-growing tech ecosystem.",
-    hero: u("photo-1623005793888-71a1ad1f25d4"),
+    visual: "HYDERABAD_CHARMINAR",
     intro: [
       "Hyderabad has matured into India's third-largest tech market, with a heavy GCC concentration and rapid growth in pharma, ITeS and consulting. The city's corporate event needs reflect that: lots of new-team-formation programs, leadership development for fast-growing engineering managers, and large quarterly all-hands.",
       "What works in Hyderabad is shaped by the office geography — HITEC City and Gachibowli are the gravitational centres, and most programs are built around those.",
@@ -341,7 +367,7 @@ export const DESTINATIONS: Destination[] = [
     category: "metro",
     state: "Tamil Nadu",
     tagline: "Corporate programs along the Coromandel Coast.",
-    hero: u("photo-1582510003544-4d00b7f74220"),
+    visual: "CHENNAI_COAST",
     intro: [
       "Chennai's corporate base is heavy on IT services, banking back-office operations, automotive engineering and a steadily growing GCC cluster. Programs here tend to be large, professionally formal, and designed around very specific competency outcomes.",
       "What works in Chennai is also shaped by climate and geography — the heat is real, the coast is genuinely useful for getaway programs, and the corridor along OMR and ECR shapes most logistics decisions.",
@@ -409,7 +435,7 @@ export const DESTINATIONS: Destination[] = [
     category: "metro",
     state: "Maharashtra",
     tagline: "Programs for Pune's IT, manufacturing and education hub.",
-    hero: u("photo-1580744725039-e5f9a3eb1f8a"),
+    visual: "GREEN_HILLS",
     intro: [
       "Pune sits in an unusual position — close enough to Mumbai for shared corporate culture, but with its own distinct identity built around IT, automotive, education and a heavy concentration of GCC operations in Hinjewadi, Kharadi and Magarpatta.",
       "Programs here benefit from access to some of India's best corporate-day-out destinations: Lonavala, Khandala, Mahabaleshwar and Karjat are all within striking distance.",
@@ -478,7 +504,7 @@ export const DESTINATIONS: Destination[] = [
     category: "metro",
     state: "West Bengal",
     tagline: "Corporate programs for the cultural capital of the East.",
-    hero: u("photo-1601361388022-25dadb16d3e4"),
+    visual: "KOLKATA_HOWRAH",
     intro: [
       "Kolkata's corporate landscape is more concentrated than its peers — heavy in financial services, ITES, manufacturing and a long-standing tea, jute and engineering legacy. Programs here often have a strong cultural identity built into them.",
       "What works in Kolkata is shaped by the city's seasons (monsoon is intense, post-Durga Puja is the peak window) and access to the Bengal countryside, Sundarbans and hill stations.",
@@ -548,7 +574,7 @@ export const DESTINATIONS: Destination[] = [
     category: "ncr",
     state: "Haryana · NCR",
     tagline: "Programs for India's largest GCC and consulting hub.",
-    hero: u("photo-1571115764595-644a1f56a55c"),
+    visual: "MODERN_OFFICE",
     intro: [
       "Gurgaon (Gurugram) is the densest concentration of GCCs, consulting firms, and BFSI back-office operations in India. The corporate event needs here are unusually heavy on leadership development, large quarterly all-hands, and high-stakes new-team-formation programs.",
       "What works here is shaped by traffic geography (Cyber Hub, Golf Course Road and DLF clusters each behave differently) and the city's reliance on the Aravalli belt for proper outdoor formats.",
@@ -618,7 +644,7 @@ export const DESTINATIONS: Destination[] = [
     category: "ncr",
     state: "Uttar Pradesh · NCR",
     tagline: "Corporate programs for Noida and Greater Noida tech corridor.",
-    hero: u("photo-1573497019418-b400bb3ab074"),
+    visual: "MODERN_OFFICE",
     intro: [
       "Noida and Greater Noida together form one of NCR's largest IT and ITES corridors, with strong manufacturing, BPO and education segments. The corporate event mix here tends toward large quarterly programs, training cohorts, and steady mid-size team-building.",
       "Programs here benefit from cleaner outdoor air than central Delhi most of the year, plus access to Sector 18, the Expressway, and Yamuna belt for venues.",
@@ -687,7 +713,7 @@ export const DESTINATIONS: Destination[] = [
     category: "ncr",
     state: "Haryana · NCR",
     tagline: "Programs for the manufacturing belt of NCR.",
-    hero: u("photo-1605649461784-7c8ef84b85b6"),
+    visual: "URBAN_INDIA",
     intro: [
       "Faridabad has long been the manufacturing heart of NCR and is now growing as a logistics and engineering hub. The corporate event needs here lean toward mid-large team programs, plant-leadership development, and operational alignment offsites.",
       "Programs here benefit from quick access to Sohna, the Aravalli belt and Damdama Lake — outdoor formats are very viable.",
@@ -754,7 +780,7 @@ export const DESTINATIONS: Destination[] = [
     category: "ncr",
     state: "Uttar Pradesh · NCR",
     tagline: "Programs for Greater Noida's expanding tech and education hub.",
-    hero: u("photo-1517248135467-4c7edcad34c4"),
+    visual: "MODERN_OFFICE",
     intro: [
       "Greater Noida has become NCR's expanding-corporate frontier — large IT campuses, education clusters, and a growing logistics base along the Yamuna Expressway. The corporate event needs here are weighted toward large-group programs and consistent quarterly cadence.",
       "Programs here benefit from on-site resort infrastructure, easy expressway access, and meaningful distance from central Delhi smog and traffic.",
@@ -820,7 +846,7 @@ export const DESTINATIONS: Destination[] = [
     category: "tier2",
     state: "Rajasthan",
     tagline: "Heritage-led corporate programs in the Pink City.",
-    hero: u("photo-1599661046289-e31897d36cf7"),
+    visual: "JAIPUR_HAWA_MAHAL",
     intro: [
       "Jaipur is one of India's most distinctive corporate-event destinations — heritage palaces, desert landscapes, and a corporate culture that has matured rapidly with the growth of the broader Tier 2 market.",
       "Programs here often draw teams from Delhi NCR for getaway-style offsites — but Jaipur also has its own steadily growing IT, education and travel-tech base.",
@@ -887,7 +913,7 @@ export const DESTINATIONS: Destination[] = [
     category: "tier2",
     state: "Gujarat",
     tagline: "Programs for Gujarat's commercial powerhouse.",
-    hero: u("photo-1591456983933-0d34a7c0f29c"),
+    visual: "HERITAGE_PALACE",
     intro: [
       "Ahmedabad anchors Gujarat's broader commercial geography — textiles, pharmaceuticals, automotive, finance and a strong family-business culture. Programs here often combine practical operational outcomes with cultural and culinary experiences specific to the region.",
       "The city has matured rapidly as a corporate destination, helped by GIFT City, the Statue of Unity, and good resort access in Polo, Saputara and the Rann of Kutch.",
@@ -953,7 +979,7 @@ export const DESTINATIONS: Destination[] = [
     category: "tier2",
     state: "Kerala",
     tagline: "Backwater and coastal programs in God's Own Country.",
-    hero: u("photo-1602215985879-d3a8c4f4f1b3"),
+    visual: "BACKWATERS",
     intro: [
       "Kochi has matured as the corporate gateway to Kerala — strong in IT, BPO, shipping, healthcare and tourism. Programs here often blend conventional corporate event design with the state's distinctive natural and cultural assets.",
       "What works in Kochi is shaped by Kerala's geography — backwaters, beaches, plantations and hill stations are all within reach. Programs often combine multiple settings into a single integrated experience.",
@@ -1022,7 +1048,7 @@ export const DESTINATIONS: Destination[] = [
     category: "tier2",
     state: "Tamil Nadu",
     tagline: "Programs for the Manchester of South India.",
-    hero: u("photo-1565711561500-49678a10a63f"),
+    visual: "WESTERN_GHATS",
     intro: [
       "Coimbatore has long been a textile and engineering hub and is now growing rapidly as an IT and education centre. Corporate event needs here lean toward mid-size leadership programs and operational alignment offsites.",
       "What works in Coimbatore is shaped by access to the Western Ghats — Ooty, Kotagiri, Valparai and Coonoor are all within practical driving distance.",
@@ -1085,7 +1111,7 @@ export const DESTINATIONS: Destination[] = [
     category: "tier2",
     state: "Punjab/Haryana",
     tagline: "Programs for the planned-city corporate base.",
-    hero: u("photo-1583417319070-4a69db38a482"),
+    visual: "GREEN_HILLS",
     intro: [
       "Chandigarh anchors a growing corporate market that includes Mohali (IT and pharma) and Panchkula. The city's planned geography and proximity to the Shivaliks make it unusual among Tier 2 markets — outdoor formats are genuinely viable nearly year-round.",
       "Programs here often draw teams that operate across Punjab, Haryana and Himachal — with regional pride being a meaningful component of program design.",
@@ -1146,7 +1172,7 @@ export const DESTINATIONS: Destination[] = [
     category: "tier2",
     state: "Madhya Pradesh",
     tagline: "Programs for India's cleanest city and central commercial hub.",
-    hero: u("photo-1589139212583-3b0ea5c2dba4"),
+    visual: "HERITAGE_PALACE",
     intro: [
       "Indore is Madhya Pradesh's largest commercial centre — strong in pharma, automotive, education and growing IT. The city has cultivated a clean, organised corporate culture that compares favourably with much larger metros.",
       "Programs here benefit from proximity to Mandu, Maheshwar and Pachmarhi — distinctive heritage and natural getaways that produce program experiences hard to replicate elsewhere.",
@@ -1207,7 +1233,7 @@ export const DESTINATIONS: Destination[] = [
     category: "tier2",
     state: "Odisha",
     tagline: "Temple-city corporate programs in the East.",
-    hero: u("photo-1582510003544-4d00b7f74220", 1400),
+    visual: "TEMPLE_HERITAGE",
     intro: [
       "Bhubaneswar has matured as Odisha's IT and government-services hub, with growing investment in education and steel-sector engineering. Programs here are often designed around the region's distinctive cultural and heritage assets.",
       "Access to Puri, Konark and Chilika Lake makes Bhubaneswar genuinely viable for one- and two-night getaway formats — and the city's broader temple architecture creates distinctive program-themes.",
@@ -1267,7 +1293,7 @@ export const DESTINATIONS: Destination[] = [
     category: "tier2",
     state: "Maharashtra",
     tagline: "Programs at India's geographic centre.",
-    hero: u("photo-1605649461784-7c8ef84b85b6", 1400),
+    visual: "FOREST_WILDLIFE",
     intro: [
       "Nagpur sits at India's geographic centre and has built a corporate identity around logistics, MIHAN's IT cluster, defence and orange-belt agriculture. The city's program demand has grown alongside investment in air connectivity and infrastructure.",
       "Programs here benefit from access to Pench and Tadoba — two of India's strongest tiger reserves and meaningful settings for senior leadership offsites.",
@@ -1328,7 +1354,7 @@ export const DESTINATIONS: Destination[] = [
     category: "tier2",
     state: "Uttar Pradesh",
     tagline: "Programs for the Nawabi capital and growing eastern UP corporate base.",
-    hero: u("photo-1599661046289-e31897d36cf7", 1400),
+    visual: "HERITAGE_PALACE",
     intro: [
       "Lucknow is the corporate centre of eastern UP and a growing IT and education hub, with strong public-sector and BFSI presence. The city's distinctive Nawabi culture creates particularly strong program-themes around hospitality, craftsmanship and culinary heritage.",
       "Programs here are often designed to include cultural integration as a core element — not as a side activity.",
@@ -1388,7 +1414,7 @@ export const DESTINATIONS: Destination[] = [
     category: "tier2",
     state: "Andhra Pradesh",
     tagline: "Coastal corporate programs at City of Destiny.",
-    hero: u("photo-1565711561500-49678a10a63f", 1400),
+    visual: "BEACH_PALMS",
     intro: [
       "Vizag (Visakhapatnam) is Andhra Pradesh's largest commercial centre — heavy on shipping, defence, steel, ITES and a growing pharma-life-sciences cluster. The city's coastal geography and access to Araku Valley make it a genuinely distinctive corporate destination.",
       "Programs here often combine beach formats with hill-getaway options — and the city's industrial culture creates strong demand for operational-excellence and leadership development programs.",
@@ -1452,7 +1478,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Karnataka",
     tagline: "Coffee-estate retreats for South India's leadership offsites.",
-    hero: u("photo-1602002418816-5c0aeef426aa"),
+    visual: "COFFEE_PLANTATION",
     intro: [
       "Coorg has been our most-booked overnight and two-night destination for over a decade — the combination of coffee-plantation geography, mature property infrastructure, and the four-hour drive from Bangalore makes it the default choice for South Indian corporate leadership offsites.",
       "What works in Coorg is shaped by the region's quiet — programs here tend to slow down in a way that produces more honest conversations than urban settings ever can.",
@@ -1524,7 +1550,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Karnataka",
     tagline: "Hill-plantation programs for serious leadership work.",
-    hero: u("photo-1583417319070-4a69db38a482", 1400),
+    visual: "COFFEE_PLANTATION",
     intro: [
       "Chikmagalur sits a little further from Bangalore than Coorg and feels meaningfully different — taller hills, more isolated properties, and a quieter pace. For leadership groups working on something genuinely difficult, the additional remoteness is part of the design.",
       "What works in Chikmagalur is the combination of plantation infrastructure with proper hill-altitude — programs here tend to feel more deliberate than Coorg's, in a useful way.",
@@ -1582,7 +1608,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Karnataka",
     tagline: "Forest-edge retreats for senior leadership cohorts.",
-    hero: u("photo-1605649461784-7c8ef84b85b6", 1400),
+    visual: "FOREST_WILDLIFE",
     intro: [
       "Kabini is one of the most distinctive corporate offsite destinations in southern India — forest-edge resorts on the boundary of the Nagarhole tiger reserve, with a quietness that recalibrates pace within hours of arrival.",
       "What works in Kabini is the deliberate isolation. Programs here are best designed around senior leadership groups working on strategy, culture, or genuine candour — less for high-energy team-building.",
@@ -1640,7 +1666,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Kerala",
     tagline: "Plantation and forest retreats for South Indian teams.",
-    hero: u("photo-1602002418816-5c0aeef426aa", 1400),
+    visual: "COFFEE_PLANTATION",
     intro: [
       "Wayanad sits high in Kerala's Western Ghats — coffee, cardamom and pepper plantations, forest retreats, and a culture distinctly different from coastal Kerala. For Bangalore and Kochi-based teams, it's a genuinely good two-night option.",
       "What works in Wayanad is the combination of plantation experience with proper hill quietness — programs here tend to be more contemplative than Coorg, with less of the corporate-default feel.",
@@ -1699,7 +1725,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Kerala",
     tagline: "Tea-estate retreats in Kerala's high country.",
-    hero: u("photo-1602002418816-5c0aeef426aa", 1500),
+    visual: "TEA_ESTATE",
     intro: [
       "Munnar's tea-estate landscape is one of the most distinctive corporate-event settings in India — endless rolling green, working plantations, and the kind of silence that produces unusual conversation quality.",
       "Programs here are usually two- or three-night formats designed around senior leadership work or significant cross-functional alignment. The setting deliberately slows the program down.",
@@ -1758,7 +1784,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Goa",
     tagline: "Beach offsites and annual day flagships.",
-    hero: u("photo-1512100356356-de1b84283e18"),
+    visual: "BEACH_PALMS",
     intro: [
       "Goa is the country's most-booked annual-day and weekend-offsite destination. The combination of mature property inventory, direct flights from every metro, and the genuine appeal of beach geography makes it the easy default for large group programs.",
       "What works in Goa is shaped by which Goa you're planning for — North Goa is high-energy and works well for younger teams; South Goa is calmer and consistently a stronger choice for leadership programs.",
@@ -1829,7 +1855,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Maharashtra",
     tagline: "Western Ghats getaways for Mumbai and Pune teams.",
-    hero: u("photo-1568322445389-f64ac2515020"),
+    visual: "GREEN_HILLS",
     intro: [
       "Lonavala is the default day-out and overnight destination for Mumbai and Pune corporate teams — close enough for half-day programs, beautiful enough for two-night offsites, and infrastructured for corporate-grade catering and activity space.",
       "What works in Lonavala is shaped by season — winter clarity, monsoon green, summer escape from coastal heat. Each produces a meaningfully different program experience.",
@@ -1896,7 +1922,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Maharashtra",
     tagline: "Hill-station retreats and strawberry-season offsites.",
-    hero: u("photo-1517824806704-9040b037703b"),
+    visual: "GREEN_HILLS",
     intro: [
       "Mahabaleshwar sits at higher altitude than Lonavala and feels meaningfully different — strawberry plantations, hill walks, and a slower pace that suits leadership work better than annual-day energy.",
       "Programs here tend to be two-night formats designed around senior leadership cohorts or cross-functional alignment retreats. Strawberry-season programs (December–March) are particularly popular.",
@@ -1953,7 +1979,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Karnataka",
     tagline: "Bangalore's go-to half-day and day-out destination.",
-    hero: u("photo-1542038784456-1ea8e935640e"),
+    visual: "GREEN_HILLS",
     intro: [
       "Nandi Hills is Bangalore's nearest viable hill destination — 60 km from the city, an hour's drive (less in pre-traffic morning hours), and just enough altitude to feel like a real change of scenery.",
       "Programs here are usually half-day or day formats designed for Bangalore-based teams who want a real change of context without the time commitment of Coorg or Chikmagalur.",
@@ -2015,7 +2041,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Karnataka",
     tagline: "Heritage-led overnight programs from Bangalore.",
-    hero: u("photo-1599661046289-e31897d36cf7", 1500),
+    visual: "HERITAGE_PALACE",
     intro: [
       "Mysore sits at a comfortable distance from Bangalore (140 km, 3 hours) and has matured as a single-overnight corporate destination — heritage palaces, premium properties, and a corporate-friendly pace.",
       "Programs here are typically single-overnight formats designed around teams that want a meaningful change of context without the two-night commitment of Coorg or Chikmagalur.",
@@ -2073,7 +2099,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Uttarakhand",
     tagline: "River-side outbound and leadership programs.",
-    hero: u("photo-1598935898639-81586f7d2129"),
+    visual: "RIVER_HIMALAYA",
     intro: [
       "Rishikesh has been our most-booked outbound destination for Delhi NCR teams over the past decade — Ganga-side properties, river adventure infrastructure, and a setting that genuinely changes the conversation in a leadership cohort within hours.",
       "Programs here are typically two- or three-night formats with strong outbound focus. The combination of river adventure, structured outbound activities, and Rishikesh's distinctive cultural setting produces consistently strong leadership program outcomes.",
@@ -2139,7 +2165,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Himachal Pradesh",
     tagline: "Mountain offsites for Northern Indian leadership groups.",
-    hero: u("photo-1542038784456-1ea8e935640e", 1500),
+    visual: "SNOW_MOUNTAINS",
     intro: [
       "Manali sits at higher altitude than Rishikesh and produces a distinctly different program atmosphere — mountain isolation, structured outdoor adventure infrastructure, and a setting that suits two- and three-night leadership cohorts particularly well.",
       "Programs here are typically more strategic in shape than Rishikesh — less raw outbound, more deliberate leadership work, longer reflection sessions.",
@@ -2197,7 +2223,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Tamil Nadu",
     tagline: "Nilgiri hill-station offsites for South Indian teams.",
-    hero: u("photo-1583417319070-4a69db38a482", 1500),
+    visual: "TEA_ESTATE",
     intro: [
       "Ooty is the largest of the Nilgiri hill stations and a long-standing favourite for Bangalore, Chennai and Coimbatore-based corporate teams. Cool weather, mature property inventory, and a distinctive colonial-hill-station feel.",
       "Programs here tend to be two-night formats designed around mid-size cohorts. Coonoor and Kotagiri (also part of the Nilgiri belt) are quieter alternatives often combined with Ooty programs.",
@@ -2256,7 +2282,7 @@ export const DESTINATIONS: Destination[] = [
     category: "getaway",
     state: "Rajasthan",
     tagline: "Desert programs for distinctive leadership offsites.",
-    hero: u("photo-1599661046289-e31897d36cf7", 1700),
+    visual: "DESERT_DUNES",
     intro: [
       "Jaisalmer's desert geography produces one of the most distinctive corporate event experiences in India — fort-city heritage, dunes, night skies, and a structural slowness that suits senior leadership work particularly well.",
       "Programs here are typically two- or three-night formats designed around 20–60 senior leadership cohorts. The setting itself contributes meaningfully to program outcomes.",

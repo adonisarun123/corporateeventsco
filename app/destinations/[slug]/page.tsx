@@ -11,6 +11,7 @@ import {
   Button,
 } from "@/components/ui";
 import { DESTINATIONS, DESTINATIONS_BY_SLUG, CATEGORY_LABELS } from "@/lib/destinations";
+import { heroUrl, thumbUrl, srcSetFor, unsplashSrcSet, photoIdFor } from "@/lib/images";
 
 type Params = { slug: string };
 
@@ -27,7 +28,7 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
     openGraph: {
       title: `Corporate events in ${d.name} | Corporate Events India`,
       description: d.tagline,
-      images: [{ url: d.hero }],
+      images: [{ url: heroUrl(d.visual) }],
     },
   };
 }
@@ -73,9 +74,16 @@ export default function DestinationPage({ params }: { params: Params }) {
               </div>
             </div>
             <div className="lg:col-span-5">
-              <div className="aspect-[4/3] overflow-hidden rounded-3xl shadow-card">
+              <div className="aspect-[4/3] overflow-hidden rounded-3xl shadow-card bg-gradient-to-br from-cream to-line">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={d.hero} alt={d.name} className="h-full w-full object-cover" />
+                <img
+                  src={heroUrl(d.visual)}
+                  srcSet={unsplashSrcSet(photoIdFor(d.visual), [600, 900, 1200, 1600])}
+                  sizes="(min-width: 1024px) 42vw, 92vw"
+                  alt={d.name}
+                  className="h-full w-full object-cover"
+                  decoding="async"
+                />
               </div>
             </div>
           </div>
@@ -227,11 +235,13 @@ export default function DestinationPage({ params }: { params: Params }) {
             title="Destinations our clients often pair with this one."
           />
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {related.slice(0, 4).map((rd) => (
+            {related.slice(0, 4).map((rd, i) => (
               <Card
                 key={rd.slug}
                 href={`/destinations/${rd.slug}`}
-                imgSrc={rd.hero}
+                imgSrc={thumbUrl(rd.visual, i)}
+                imgSrcSet={srcSetFor(rd.visual, i, [320, 480, 600, 800])}
+                imgSizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
                 imgAlt={rd.name}
                 tag={rd.state}
                 title={rd.name}

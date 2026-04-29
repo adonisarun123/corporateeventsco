@@ -13,6 +13,7 @@ import {
 } from "@/components/ui";
 import { STATS, IMG, INDUSTRIES, BLOG_POSTS } from "@/lib/content";
 import { DESTINATIONS_BY_SLUG } from "@/lib/destinations";
+import { thumbUrl, srcSetFor } from "@/lib/images";
 
 const FEATURED_DESTINATIONS = [
   "bangalore",
@@ -283,11 +284,13 @@ export default function HomePage() {
         </div>
         <div className="-mx-5 sm:-mx-8 lg:-mx-12">
           <div className="px-5 sm:px-8 lg:px-12 flex gap-5 overflow-x-auto no-scrollbar scroll-x-snap pb-2">
-            {FEATURED_DESTINATIONS.map((d) => (
+            {FEATURED_DESTINATIONS.map((d, i) => (
               <div key={d.slug} className="w-[260px] sm:w-[300px] shrink-0">
                 <Card
                   href={`/destinations/${d.slug}`}
-                  imgSrc={d.hero}
+                  imgSrc={thumbUrl(d.visual, i)}
+                  imgSrcSet={srcSetFor(d.visual, i, [320, 480, 600, 800])}
+                  imgSizes="(max-width: 640px) 75vw, 320px"
                   imgAlt={d.name}
                   tag={d.state}
                   title={d.name}

@@ -8,6 +8,7 @@ import {
   CtaBanner,
 } from "@/components/ui";
 import { DESTINATIONS, CATEGORY_LABELS, type DestCategory } from "@/lib/destinations";
+import { thumbUrl, srcSetFor } from "@/lib/images";
 
 export const metadata: Metadata = {
   title: "Destinations across India",
@@ -81,11 +82,13 @@ export default function DestinationsIndexPage() {
             />
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {items.map((d) => (
+            {items.map((d, i) => (
               <Card
                 key={d.slug}
                 href={`/destinations/${d.slug}`}
-                imgSrc={d.hero}
+                imgSrc={thumbUrl(d.visual, i)}
+                imgSrcSet={srcSetFor(d.visual, i, [320, 480, 600, 800])}
+                imgSizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
                 imgAlt={d.name}
                 tag={d.state}
                 title={d.name}
