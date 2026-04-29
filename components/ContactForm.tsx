@@ -20,10 +20,36 @@ const inputCls =
 
 export function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSubmitted(true);
+    if (submitting) return;
+    setError(null);
+    setSubmitting(true);
+
+    const formData = new FormData(e.currentTarget);
+    const payload = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Something went wrong. Please try again.");
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
@@ -107,10 +133,16 @@ export function ContactForm() {
 
       <button
         type="submit"
-        className="mt-6 inline-flex items-center justify-center rounded-full bg-ink text-white font-semibold px-7 py-4 hover:bg-ink/90 transition-colors w-full sm:w-auto"
+        disabled={submitting}
+        className="mt-6 inline-flex items-center justify-center rounded-full bg-ink text-white font-semibold px-7 py-4 hover:bg-ink/90 transition-colors w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        Submit · Proposal in 24 hours
+        {submitting ? "Sending…" : "Submit · Proposal in 24 hours"}
       </button>
+      {error && (
+        <p className="mt-3 text-[13px] text-accent" role="alert">
+          {error}
+        </p>
+      )}
       <p className="mt-3 text-[13px] text-ink-muted">
         A real person reads every submission. No automated sequences. No commitment required.
       </p>
