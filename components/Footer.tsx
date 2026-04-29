@@ -15,6 +15,16 @@ const COL_FORMATS = [
   { href: "/services#virtual", label: "Virtual" },
 ];
 
+const COL_DESTINATIONS = [
+  { href: "/destinations/bangalore", label: "Bangalore" },
+  { href: "/destinations/delhi", label: "Delhi" },
+  { href: "/destinations/mumbai", label: "Mumbai" },
+  { href: "/destinations/coorg", label: "Coorg" },
+  { href: "/destinations/goa", label: "Goa" },
+  { href: "/destinations/rishikesh", label: "Rishikesh" },
+  { href: "/destinations", label: "All destinations →" },
+];
+
 const COL_INSIGHTS = [
   { href: "/blog/why-corporate-events-fail", label: "Why corporate events fail" },
   { href: "/blog/indoor-outdoor-virtual-team-building", label: "Choosing a format" },
@@ -66,8 +76,8 @@ export function Footer() {
           </div>
 
           <FooterCol title="Services" items={COL_SERVICES} />
-          <FooterCol title="Formats" items={COL_FORMATS} />
-          <FooterCol title="Insights" items={COL_INSIGHTS} />
+          <FooterCol title="Destinations" items={COL_DESTINATIONS} />
+          <FooterCol title="Blog" items={COL_INSIGHTS} />
           <FooterCol title="Company" items={COL_COMPANY} />
         </div>
 

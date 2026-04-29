@@ -12,6 +12,20 @@ import {
   CtaBanner,
 } from "@/components/ui";
 import { STATS, IMG, INDUSTRIES, BLOG_POSTS } from "@/lib/content";
+import { DESTINATIONS_BY_SLUG } from "@/lib/destinations";
+
+const FEATURED_DESTINATIONS = [
+  "bangalore",
+  "coorg",
+  "goa",
+  "rishikesh",
+  "delhi",
+  "lonavala",
+  "chikmagalur",
+  "mumbai",
+  "kabini",
+  "jaisalmer",
+].map((slug) => DESTINATIONS_BY_SLUG[slug]);
 
 export const metadata: Metadata = {
   title: "Corporate Events India | Team Building & Outings",
@@ -260,23 +274,24 @@ export default function HomePage() {
         <div className="flex items-end justify-between gap-6 mb-8">
           <SectionHeading
             eyebrow="Destinations"
-            title="82+ corporate-ready properties across India."
-            subtitle="Resorts, coffee estates, beach properties, hill stations, and adventure camps — every one vetted by our team."
+            title="30+ cities and getaway destinations across India."
+            subtitle="Major metros, NCR, Tier 2 markets, and the country's strongest leadership-offsite destinations — every one with its own page."
           />
-          <Link href="/services#stays" className="hidden sm:inline-flex shrink-0 text-sm font-semibold text-ink hover:text-brand">
+          <Link href="/destinations" className="hidden sm:inline-flex shrink-0 text-sm font-semibold text-ink hover:text-brand">
             See all destinations →
           </Link>
         </div>
         <div className="-mx-5 sm:-mx-8 lg:-mx-12">
           <div className="px-5 sm:px-8 lg:px-12 flex gap-5 overflow-x-auto no-scrollbar scroll-x-snap pb-2">
-            {IMG.outingsCarousel.map((d, i) => (
-              <div key={i} className="w-[260px] sm:w-[300px] shrink-0">
+            {FEATURED_DESTINATIONS.map((d) => (
+              <div key={d.slug} className="w-[260px] sm:w-[300px] shrink-0">
                 <Card
-                  imgSrc={d.src}
-                  imgAlt={d.title}
-                  title={d.title}
-                  subtitle={d.subtitle}
-                  meta={d.meta}
+                  href={`/destinations/${d.slug}`}
+                  imgSrc={d.hero}
+                  imgAlt={d.name}
+                  tag={d.state}
+                  title={d.name}
+                  subtitle={d.tagline}
                 />
               </div>
             ))}
@@ -383,20 +398,20 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* INSIGHTS / blog */}
-      <Section className="bg-cream">
+      {/* BLOG */}
+      <Section id="blog" className="bg-cream">
         <div className="flex items-end justify-between gap-6 mb-8">
           <SectionHeading
-            eyebrow="Insights"
+            eyebrow="From the blog"
             title="13 years of earned opinions."
-            subtitle="We share them openly: in our proposals, in our consultations, and on this page."
+            subtitle="Practical, opinionated thinking on corporate event design, team building, and leadership development — for HR and L&D leaders."
           />
           <Link href="/blog" className="hidden sm:inline-flex shrink-0 text-sm font-semibold text-ink hover:text-brand">
             All articles →
           </Link>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {BLOG_POSTS.slice(0, 3).map((p) => (
+          {BLOG_POSTS.map((p) => (
             <Card
               key={p.slug}
               href={`/blog/${p.slug}`}
@@ -408,6 +423,14 @@ export default function HomePage() {
               meta={p.readingTime}
             />
           ))}
+        </div>
+        <div className="mt-10 flex justify-center sm:hidden">
+          <Link
+            href="/blog"
+            className="inline-flex items-center justify-center rounded-full bg-ink text-white text-sm font-semibold px-6 py-3"
+          >
+            All articles
+          </Link>
         </div>
       </Section>
 

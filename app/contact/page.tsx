@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   Section,
   SectionHeading,
@@ -7,6 +8,14 @@ import {
 } from "@/components/ui";
 import { SITE } from "@/lib/content";
 import { ContactForm } from "@/components/ContactForm";
+
+function citySlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 
 export const metadata: Metadata = {
   title: "Contact us",
@@ -202,11 +211,19 @@ export default function ContactPage() {
 
       {/* CITIES */}
       <Section>
-        <SectionHeading
-          eyebrow="Cities we serve"
-          title="82+ destinations across India."
-        />
-        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="flex items-end justify-between gap-6 mb-8">
+          <SectionHeading
+            eyebrow="Cities we serve"
+            title="30+ destinations across India."
+          />
+          <Link
+            href="/destinations"
+            className="hidden sm:inline-flex shrink-0 text-sm font-semibold text-ink hover:text-brand"
+          >
+            All destinations →
+          </Link>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {[
             { title: "Major metros", list: CITIES.metros },
             { title: "NCR", list: CITIES.ncr },
@@ -217,12 +234,13 @@ export default function ContactPage() {
               <h3 className="font-display text-lg font-semibold text-ink">{g.title}</h3>
               <div className="mt-4 flex flex-wrap gap-2">
                 {g.list.map((c) => (
-                  <span
+                  <Link
                     key={c}
-                    className="rounded-full border border-line px-3 py-1.5 text-[13px] text-ink"
+                    href={`/destinations/${citySlug(c)}`}
+                    className="rounded-full border border-line px-3 py-1.5 text-[13px] text-ink hover:border-ink hover:bg-cream transition-colors"
                   >
                     {c}
-                  </span>
+                  </Link>
                 ))}
               </div>
             </div>
