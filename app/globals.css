@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+}
+
+html, body {
+  font-family: var(--font-sans);
+}
+
+body {
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* Airbnb-style focus ring */
+*:focus-visible {
+  outline: 2px solid #0F4C5C;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Container helper */
+.container-page {
+  @apply mx-auto w-full max-w-page px-5 sm:px-8 lg:px-12;
+}
+
+/* Soft hover-lift used on Airbnb-style cards */
+.card-lift {
+  @apply transition-all duration-300 ease-out;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+}
+
+/* Marquee-like row */
+.scroll-x-snap {
+  scroll-snap-type: x mandatory;
+}
+.scroll-x-snap > * {
+  scroll-snap-align: start;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Decorative underline used on hero word */
+.underline-brush {
+  position: relative;
+  white-space: nowrap;
+}
+.underline-brush::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.05em;
+  height: 0.32em;
+  background: rgba(255, 56, 92, 0.18);
+  border-radius: 9999px;
+  z-index: -1;
+}
+
+/* Prose tweaks for blog pages */
+.prose-article p {
+  @apply text-[17px] leading-[1.75] text-ink;
+}
+.prose-article p + p {
+  @apply mt-5;
+}
+.prose-article h2 {
+  @apply font-display text-[1.625rem] sm:text-3xl font-semibold mt-12 mb-4 tracking-tight text-ink;
+}
+.prose-article h3 {
+  @apply font-display text-xl sm:text-2xl font-semibold mt-8 mb-3 tracking-tight text-ink;
+}
+.prose-article ul {
+  @apply space-y-2 my-5 pl-5 list-disc text-ink;
+}
+.prose-article blockquote {
+  @apply border-l-4 border-brand pl-6 py-1 my-6 text-ink-muted italic;
+}
