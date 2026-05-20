@@ -10,8 +10,18 @@ import {
   CtaBanner,
   Button,
 } from "@/components/ui";
-import { DESTINATIONS, DESTINATIONS_BY_SLUG, CATEGORY_LABELS } from "@/lib/destinations";
-import { heroUrl, thumbUrl, srcSetFor, unsplashSrcSet, photoIdFor } from "@/lib/images";
+import {
+  DESTINATIONS,
+  DESTINATIONS_BY_SLUG,
+  CATEGORY_LABELS,
+} from "@/lib/destinations";
+import {
+  heroUrl,
+  thumbUrl,
+  srcSetFor,
+  unsplashSrcSet,
+  keywordsFor,
+} from "@/lib/images";
 
 type Params = { slug: string };
 
@@ -22,13 +32,34 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: { params: Params }): Metadata {
   const d = DESTINATIONS_BY_SLUG[params.slug];
   if (!d) return {};
+  const title = `Corporate Events & Team Building in ${d.name}`;
+  const description = `${d.tagline} Corporate offsites, team building activities, and leadership programs in ${d.name}. End-to-end execution. Free proposal in 24 hours.`;
+  const url = `https://corporateeventsindia.com/destinations/${d.slug}`;
   return {
-    title: `Corporate events in ${d.name}`,
-    description: `${d.tagline} Custom corporate events, team building activities, and leadership programs in ${d.name}. Free proposal in 24 hours.`,
+    title,
+    description,
+    keywords: [
+      `corporate events in ${d.name}`,
+      `team building activities ${d.name}`,
+      `corporate offsite ${d.name}`,
+      `team outing ${d.name}`,
+      `corporate event venues ${d.name}`,
+      `leadership offsite ${d.name}`,
+    ],
+    alternates: { canonical: url },
     openGraph: {
-      title: `Corporate events in ${d.name} | Corporate Events India`,
-      description: d.tagline,
-      images: [{ url: heroUrl(d.visual) }],
+      title: `${title} | Corporate Events India`,
+      description,
+      url,
+      images: [{ url: heroUrl(d.visual), width: 1200, height: 900, alt: d.name }],
+      locale: "en_IN",
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [heroUrl(d.visual)],
     },
   };
 }
@@ -41,12 +72,88 @@ export default function DestinationPage({ params }: { params: Params }) {
     .map((n) => DESTINATIONS_BY_SLUG[n.href.replace("/destinations/", "")])
     .filter(Boolean);
 
+  /* JSON-LD: FAQPage + BreadcrumbList + TouristDestination */
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: d.faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://corporateeventsindia.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Destinations",
+        item: "https://corporateeventsindia.com/destinations",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: d.name,
+        item: `https://corporateeventsindia.com/destinations/${d.slug}`,
+      },
+    ],
+  };
+
+  const serviceJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    serviceType: "Corporate Event Management",
+    name: `Corporate Events in ${d.name}`,
+    description: d.tagline,
+    provider: {
+      "@type": "Organization",
+      name: "Corporate Events India",
+      url: "https://corporateeventsindia.com",
+    },
+    areaServed: {
+      "@type": "City",
+      name: d.name,
+      address: { "@type": "PostalAddress", addressRegion: d.state, addressCountry: "IN" },
+    },
+    offers: {
+      "@type": "Offer",
+      url: `https://corporateeventsindia.com/destinations/${d.slug}`,
+      availability: "https://schema.org/InStock",
+    },
+  };
+
   return (
     <>
+      {/* Structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
+      />
+
       {/* HERO */}
       <section className="relative">
         <div className="container-page pt-12 pb-10 sm:pt-16">
-          <div className="text-[12px] uppercase tracking-[0.18em] font-semibold flex items-center gap-3">
+          <nav
+            aria-label="Breadcrumb"
+            className="text-[12px] uppercase tracking-[0.18em] font-semibold flex items-center gap-3"
+          >
             <Link href="/destinations" className="text-ink-muted hover:text-ink">
               Destinations
             </Link>
@@ -54,7 +161,7 @@ export default function DestinationPage({ params }: { params: Params }) {
             <span className="text-brand">{CATEGORY_LABELS[d.category]}</span>
             <span className="text-ink-muted">·</span>
             <span className="text-ink-muted">{d.state}</span>
-          </div>
+          </nav>
 
           <div className="mt-6 grid gap-10 lg:grid-cols-12 items-end">
             <div className="lg:col-span-7">
@@ -74,15 +181,19 @@ export default function DestinationPage({ params }: { params: Params }) {
               </div>
             </div>
             <div className="lg:col-span-5">
-              <div className="aspect-[4/3] overflow-hidden rounded-3xl shadow-card bg-gradient-to-br from-cream to-line">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-card bg-gradient-to-br from-cream to-line">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={heroUrl(d.visual)}
-                  srcSet={unsplashSrcSet(photoIdFor(d.visual), [600, 900, 1200, 1600])}
+                  srcSet={unsplashSrcSet(keywordsFor(d.visual), [480, 640, 900, 1200])}
                   sizes="(min-width: 1024px) 42vw, 92vw"
-                  alt={d.name}
+                  alt={`Corporate events in ${d.name} — ${d.state}`}
                   className="h-full w-full object-cover"
                   decoding="async"
+                  loading="eager"
+                  fetchPriority="high"
+                  width={1200}
+                  height={900}
                 />
               </div>
             </div>
@@ -187,7 +298,7 @@ export default function DestinationPage({ params }: { params: Params }) {
               Where we run {d.name} programs.
             </h2>
             <p className="mt-4 text-[16px] text-ink-muted leading-relaxed max-w-2xl">
-              These are properties we've vetted for corporate-grade activity
+              These are properties we&apos;ve vetted for corporate-grade activity
               space, catering quality at scale, and on-the-day service
               reliability. Final shortlists depend on your group size, dates,
               and program format.
@@ -242,7 +353,7 @@ export default function DestinationPage({ params }: { params: Params }) {
                 imgSrc={thumbUrl(rd.visual, i)}
                 imgSrcSet={srcSetFor(rd.visual, i, [320, 480, 600, 800])}
                 imgSizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
-                imgAlt={rd.name}
+                imgAlt={`${rd.name} corporate offsite — ${rd.state}`}
                 tag={rd.state}
                 title={rd.name}
                 subtitle={rd.tagline}

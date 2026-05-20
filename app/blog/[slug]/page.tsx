@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import {
   Section,
   SectionHeading,
-  Eyebrow,
   Card,
   Faqs,
   CtaBanner,
@@ -20,14 +19,24 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: { params: Params }): Metadata {
   const post = BLOG_POSTS.find((p) => p.slug === params.slug);
   if (!post) return {};
+  const url = `https://corporateeventsindia.com/blog/${post.slug}`;
   return {
     title: post.metaTitle,
     description: post.metaDescription,
+    alternates: { canonical: url },
     openGraph: {
       title: post.metaTitle,
       description: post.metaDescription,
-      images: [{ url: post.hero }],
+      url,
+      images: [{ url: post.hero, width: 1200, height: 630, alt: post.title }],
       type: "article",
+      locale: "en_IN",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.metaTitle,
+      description: post.metaDescription,
+      images: [post.hero],
     },
   };
 }
@@ -38,12 +47,92 @@ export default function BlogPostPage({ params }: { params: Params }) {
 
   const others = BLOG_POSTS.filter((p) => p.slug !== params.slug).slice(0, 3);
 
+  /* JSON-LD: Article + FAQPage + BreadcrumbList */
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.metaDescription,
+    image: [post.hero],
+    datePublished: "2025-01-01",
+    dateModified: "2026-05-20",
+    author: {
+      "@type": "Organization",
+      name: "Corporate Events India",
+      url: "https://corporateeventsindia.com",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Corporate Events India",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://corporateeventsindia.com/icon.svg",
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://corporateeventsindia.com/blog/${post.slug}`,
+    },
+    articleSection: post.category,
+  };
+
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: post.faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://corporateeventsindia.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: "https://corporateeventsindia.com/blog",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: `https://corporateeventsindia.com/blog/${post.slug}`,
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+
       {/* HERO */}
       <Section className="pb-0">
         <div className="max-w-3xl">
-          <div className="flex items-center gap-3 text-[12px] uppercase tracking-[0.18em] font-semibold">
+          <nav
+            aria-label="Breadcrumb"
+            className="flex items-center gap-3 text-[12px] uppercase tracking-[0.18em] font-semibold"
+          >
             <Link href="/blog" className="text-ink-muted hover:text-ink">
               Insights
             </Link>
@@ -51,7 +140,7 @@ export default function BlogPostPage({ params }: { params: Params }) {
             <span className="text-brand">{post.category}</span>
             <span className="text-ink-muted">·</span>
             <span className="text-ink-muted">{post.readingTime}</span>
-          </div>
+          </nav>
           <h1 className="mt-5 font-display text-display-lg sm:text-display-xl font-semibold tracking-tight text-ink">
             {post.title}
           </h1>
@@ -65,7 +154,15 @@ export default function BlogPostPage({ params }: { params: Params }) {
       <Section className="pt-10">
         <div className="aspect-[16/8] overflow-hidden rounded-3xl shadow-card">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={post.hero} alt={post.title} className="h-full w-full object-cover" />
+          <img
+            src={post.hero}
+            alt={post.title}
+            className="h-full w-full object-cover"
+            loading="eager"
+            fetchPriority="high"
+            width={1600}
+            height={800}
+          />
         </div>
       </Section>
 
@@ -73,7 +170,6 @@ export default function BlogPostPage({ params }: { params: Params }) {
       <Section className="pt-2">
         <div className="grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-2">
-            {/* On-page anchor: keeps the column structured like an article */}
             <div className="sticky top-28 hidden lg:block">
               <div className="text-[12px] uppercase tracking-[0.18em] font-semibold text-ink-muted">
                 Article
@@ -139,7 +235,9 @@ export default function BlogPostPage({ params }: { params: Params }) {
         title={post.cta.title}
         body={post.cta.body}
         primary={{ label: post.cta.primary, href: "/contact" }}
-        secondary={post.cta.secondary ? { label: post.cta.secondary, href: "/services" } : undefined}
+        secondary={
+          post.cta.secondary ? { label: post.cta.secondary, href: "/services" } : undefined
+        }
       />
     </>
   );

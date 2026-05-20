@@ -11,6 +11,7 @@ import {
   Faqs,
   CtaBanner,
 } from "@/components/ui";
+import { ContactForm } from "@/components/ContactForm";
 import { STATS, IMG, INDUSTRIES, BLOG_POSTS } from "@/lib/content";
 import { DESTINATIONS_BY_SLUG } from "@/lib/destinations";
 import { thumbUrl, srcSetFor } from "@/lib/images";
@@ -29,9 +30,18 @@ const FEATURED_DESTINATIONS = [
 ].map((slug) => DESTINATIONS_BY_SLUG[slug]);
 
 export const metadata: Metadata = {
-  title: "Corporate Events India | Team Building & Outings",
+  title:
+    "Corporate Events India | Team Building, Offsites & Outings in India",
   description:
-    "India's trusted corporate events company. Team building, off-sites, virtual programs, and training. 550+ companies. Proposals in 24 hours.",
+    "India's outcome-led corporate events company. Team building, offsites, leadership training, and curated outings across 30+ cities. 550+ companies. Custom proposals in 24 hours.",
+  alternates: { canonical: "https://corporateeventsindia.com" },
+  openGraph: {
+    title: "Corporate Events India",
+    description:
+      "Team building, offsites, leadership training and curated outings across 30+ cities in India.",
+    url: "https://corporateeventsindia.com",
+    images: [{ url: "https://corporateeventsindia.com/icon.svg" }],
+  },
 };
 
 const HOW_WE_WORK = [
@@ -108,9 +118,43 @@ const HOME_FAQS = [
   },
 ];
 
+/** WebSite + WebPage JSON-LD for the homepage — gives Google a sitelinks
+ * search box and richer brand presence. */
+const HOMEPAGE_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  url: "https://corporateeventsindia.com",
+  name: "Corporate Events India",
+  potentialAction: {
+    "@type": "SearchAction",
+    target:
+      "https://corporateeventsindia.com/destinations?q={search_term_string}",
+    "query-input": "required name=search_term_string",
+  },
+};
+
+const HOMEPAGE_FAQ_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: HOME_FAQS.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
 export default function HomePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(HOMEPAGE_JSONLD) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(HOMEPAGE_FAQ_JSONLD) }}
+      />
+
       {/* HERO */}
       <section className="relative">
         <div className="container-page pt-12 pb-10 sm:pt-20 sm:pb-16">
@@ -123,9 +167,9 @@ export default function HomePage() {
               </h1>
               <p className="mt-6 text-lg sm:text-xl text-ink-muted leading-relaxed max-w-2xl">
                 We design and execute corporate events that change how teams
-                work. Not just &ldquo;okay.&rdquo; Not just &ldquo;the food was nice.&rdquo;
-                Actually good — because every program is built around one question
-                most companies never ask.
+                work. Team building, offsites, leadership programs and curated
+                outings across 30+ cities — every program built around one
+                question most companies never ask.
               </p>
 
               <div className="mt-8 inline-flex items-center gap-3 rounded-full bg-cream border border-line px-5 py-3">
@@ -138,7 +182,7 @@ export default function HomePage() {
               </div>
 
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button href="/contact" size="lg">
+                <Button href="#plan" size="lg">
                   Get a free proposal
                 </Button>
                 <Button href="/services" size="lg" variant="secondary">
@@ -147,11 +191,17 @@ export default function HomePage() {
               </div>
 
               <div className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-muted">
-                <span><strong className="text-ink">87%</strong> rebook within 12 months</span>
+                <span>
+                  <strong className="text-ink">87%</strong> rebook within 12 months
+                </span>
                 <span>·</span>
-                <span><strong className="text-ink">4.9/5</strong> client rating</span>
+                <span>
+                  <strong className="text-ink">4.9/5</strong> client rating
+                </span>
                 <span>·</span>
-                <span><strong className="text-ink">24-hour</strong> proposals</span>
+                <span>
+                  <strong className="text-ink">24-hour</strong> proposals
+                </span>
               </div>
             </div>
 
@@ -161,8 +211,12 @@ export default function HomePage() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={IMG.hero}
-                    alt="A facilitated team workshop"
+                    alt="A facilitated corporate team workshop in India"
                     className="h-full w-full object-cover"
+                    loading="eager"
+                    fetchPriority="high"
+                    width={900}
+                    height={1125}
                   />
                 </div>
                 <div className="hidden sm:block absolute -left-6 -bottom-6 w-56 rounded-2xl bg-white border border-line shadow-card p-4">
@@ -170,9 +224,11 @@ export default function HomePage() {
                     Last week · Coorg
                   </div>
                   <div className="mt-1 font-display text-base font-semibold text-ink leading-snug">
-                    "The best team experience my team ever had."
+                    &ldquo;The best team experience my team ever had.&rdquo;
                   </div>
-                  <div className="mt-1 text-[12px] text-ink-muted">— EVP & Head HR, Infosys</div>
+                  <div className="mt-1 text-[12px] text-ink-muted">
+                    — EVP &amp; Head HR, Infosys
+                  </div>
                 </div>
                 <div className="hidden lg:block absolute -right-6 top-8 w-44 rounded-2xl bg-ink text-white p-4 shadow-card">
                   <div className="text-[11px] uppercase tracking-[0.18em] text-white/60">
@@ -181,7 +237,9 @@ export default function HomePage() {
                   <div className="mt-1 font-display text-base font-semibold leading-snug">
                     Proposal sent in 6h 12m
                   </div>
-                  <div className="mt-1 text-[12px] text-white/60">For a 220-person leadership offsite</div>
+                  <div className="mt-1 text-[12px] text-white/60">
+                    For a 220-person leadership offsite
+                  </div>
                 </div>
               </div>
             </div>
@@ -192,6 +250,27 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* TRUST STRIP — credibility built early */}
+      <div className="bg-white border-y border-line">
+        <div className="container-page py-10 sm:py-12">
+          <p className="text-center text-[12px] uppercase tracking-[0.2em] text-ink-muted">
+            Trusted by HR &amp; L&amp;D teams at
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+            {["Infosys", "SAP", "Genpact", "Cipla", "TVS", "Target", "ITC", "HDFC"].map(
+              (name) => (
+                <span
+                  key={name}
+                  className="font-display text-lg sm:text-xl font-semibold tracking-tight text-ink/70"
+                >
+                  {name}
+                </span>
+              ),
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* DISARM — what most events get wrong */}
       <Section className="bg-cream">
@@ -204,20 +283,21 @@ export default function HomePage() {
           </div>
           <div className="lg:col-span-7 space-y-5 text-[17px] text-ink leading-relaxed">
             <p>
-              Be honest: you've been to one of these. A resort is booked. A
+              Be honest: you&apos;ve been to one of these. A resort is booked. A
               caterer is called. Some games are added to the schedule. Everyone
               shows up, takes photos, and goes home. The survey says 4.1 out of
-              5. And three weeks later, nobody can tell you what the point of it was.
+              5. And three weeks later, nobody can tell you what the point of
+              it was.
             </p>
             <p className="font-display text-xl text-ink">
               That is not a bad event. That is a well-executed non-event.
             </p>
             <p className="text-ink-muted">
-              The best corporate events are not just fun. They are purposeful. They
-              help teams that don't normally talk to each other actually connect.
-              They surface how people lead and communicate in ways the office
-              never shows. They create memories teams still reference six months
-              later when things get hard.
+              The best corporate events are not just fun. They are purposeful.
+              They help teams that don&apos;t normally talk to each other
+              actually connect. They surface how people lead and communicate in
+              ways the office never shows. They create memories teams still
+              reference six months later when things get hard.
             </p>
           </div>
         </div>
@@ -234,7 +314,7 @@ export default function HomePage() {
           <PillarCard
             href="/services#team-outings"
             imgSrc={IMG.outing}
-            imgAlt="Resort outing"
+            imgAlt="Corporate resort outing in India"
             kicker="Team outings"
             title="Corporate Team Outings"
             description="Full-day or overnight programs at hand-picked resorts, with team building woven into the itinerary from the start. Not a day off with games thrown in."
@@ -243,7 +323,7 @@ export default function HomePage() {
           <PillarCard
             href="/services#team-building"
             imgSrc={IMG.building}
-            imgAlt="Team building activity"
+            imgAlt="Corporate team building activity"
             kicker="100+ activities"
             title="Team Building Activities"
             description="Indoor, outdoor, outbound, and virtual. Every activity mapped to a specific outcome — not what looks good in a catalogue."
@@ -252,16 +332,20 @@ export default function HomePage() {
           <PillarCard
             href="/services#training"
             imgSrc={IMG.training}
-            imgAlt="Leadership training"
+            imgAlt="Corporate leadership training"
             kicker="L&D"
             title="Specialised Training"
             description="Leadership development, soft skills, and Campus to Corporate. Structured programs with clear learning goals and documented outcomes."
-            bullets={["Leadership training", "Campus to Corporate", "Outbound corporate training"]}
+            bullets={[
+              "Leadership training",
+              "Campus to Corporate",
+              "Outbound corporate training",
+            ]}
           />
           <PillarCard
             href="/services#stays"
             imgSrc={IMG.stays}
-            imgAlt="Premium resort"
+            imgAlt="Premium corporate offsite resort"
             kicker="82+ destinations"
             title="Curated Corporate Stays"
             description="Resort and property partners across India, every one vetted by our team for corporate use — activity space, food quality, room capacity, service."
@@ -278,7 +362,10 @@ export default function HomePage() {
             title="30+ cities and getaway destinations across India."
             subtitle="Major metros, NCR, Tier 2 markets, and the country's strongest leadership-offsite destinations — every one with its own page."
           />
-          <Link href="/destinations" className="hidden sm:inline-flex shrink-0 text-sm font-semibold text-ink hover:text-brand">
+          <Link
+            href="/destinations"
+            className="hidden sm:inline-flex shrink-0 text-sm font-semibold text-ink hover:text-brand"
+          >
             See all destinations →
           </Link>
         </div>
@@ -291,7 +378,7 @@ export default function HomePage() {
                   imgSrc={thumbUrl(d.visual, i)}
                   imgSrcSet={srcSetFor(d.visual, i, [320, 480, 600, 800])}
                   imgSizes="(max-width: 640px) 75vw, 320px"
-                  imgAlt={d.name}
+                  imgAlt={`Corporate events in ${d.name} — ${d.state}`}
                   tag={d.state}
                   title={d.name}
                   subtitle={d.tagline}
@@ -324,8 +411,59 @@ export default function HomePage() {
         </div>
       </Section>
 
+      {/* INLINE LEAD FORM — visible above the fold for serious inquirers */}
+      <Section id="plan">
+        <div className="grid gap-10 lg:grid-cols-12 items-start">
+          <div className="lg:col-span-5">
+            <SectionHeading
+              eyebrow="Plan your event"
+              title="Tell us your brief. We'll send a real proposal in 24 hours."
+              subtitle="No automated sequences. No commitment. Every brief is read by a senior strategist who has run programs like yours."
+            />
+            <div className="mt-8 space-y-5 text-[15px] text-ink leading-relaxed">
+              <Trust
+                title="A real strategist, not a junior account manager"
+                body="Your brief lands with someone who has personally run 200+ corporate programs."
+              />
+              <Trust
+                title="A genuine recommendation, not a template"
+                body="We design from your group, your dates, your outcome — not from a brochure."
+              />
+              <Trust
+                title="One point of contact. One invoice. No surprises."
+                body="End-to-end execution: venue, transport, food, facilitation, photography, post-event report."
+              />
+            </div>
+            <div className="mt-8 rounded-2xl bg-cream border border-line p-5">
+              <div className="text-[12px] uppercase tracking-[0.18em] font-semibold text-ink-muted">
+                Prefer to talk?
+              </div>
+              <div className="mt-2 text-[15px] text-ink leading-relaxed">
+                Call{" "}
+                <a href="tel:+919986058666" className="font-semibold text-ink hover:text-brand">
+                  +91 99860 58666
+                </a>{" "}
+                or{" "}
+                <a
+                  href="https://wa.me/919986058666"
+                  className="font-semibold text-ink hover:text-brand"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  WhatsApp us
+                </a>
+                . Mon–Sat · 9:30 am – 6:30 pm IST.
+              </div>
+            </div>
+          </div>
+          <div className="lg:col-span-7">
+            <ContactForm />
+          </div>
+        </div>
+      </Section>
+
       {/* OUTCOMES */}
-      <Section>
+      <Section className="bg-cream">
         <SectionHeading
           eyebrow="What good looks like"
           title="Three real outcomes from the last quarter."
@@ -339,7 +477,13 @@ export default function HomePage() {
             >
               <div className="relative aspect-[4/3] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={o.img} alt={o.tag} className="h-full w-full object-cover" loading="lazy" />
+                <img
+                  src={o.img}
+                  alt={o.tag}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
               <div className="p-6 sm:p-7">
                 <div className="text-[11px] uppercase tracking-[0.18em] text-brand font-semibold">
@@ -359,16 +503,27 @@ export default function HomePage() {
       <section className="bg-ink text-white">
         <div className="container-page py-16 sm:py-20 grid gap-10 lg:grid-cols-3">
           <div>
-            <Eyebrow><span className="text-white/70">Our point of view</span></Eyebrow>
+            <Eyebrow>
+              <span className="text-white/70">Our point of view</span>
+            </Eyebrow>
             <h2 className="mt-3 font-display text-display-md font-semibold tracking-tight">
               Three things we believe — after 13 years and 550+ programs.
             </h2>
           </div>
           <div className="space-y-4 lg:col-span-2 grid sm:grid-cols-3 gap-6 lg:gap-8 lg:space-y-0">
             {[
-              { k: "Outcome > activity", v: "The activity is never the point. It is the trigger. The point is the conversation that follows." },
-              { k: "Facilitation > fun", v: "A great venue does not save a poorly designed program. A trained facilitator can save almost anything." },
-              { k: "Design > logistics", v: "Choose the venue after you have chosen the outcome. Not the other way around." },
+              {
+                k: "Outcome > activity",
+                v: "The activity is never the point. It is the trigger. The point is the conversation that follows.",
+              },
+              {
+                k: "Facilitation > fun",
+                v: "A great venue does not save a poorly designed program. A trained facilitator can save almost anything.",
+              },
+              {
+                k: "Design > logistics",
+                v: "Choose the venue after you have chosen the outcome. Not the other way around.",
+              },
             ].map((p) => (
               <div key={p.k} className="rounded-2xl bg-white/5 border border-white/10 p-6">
                 <div className="font-display text-xl font-semibold">{p.k}</div>
@@ -388,10 +543,7 @@ export default function HomePage() {
         />
         <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {INDUSTRIES.map((ind) => (
-            <div
-              key={ind.name}
-              className="rounded-2xl border border-line bg-white p-6 card-lift"
-            >
+            <div key={ind.name} className="rounded-2xl border border-line bg-white p-6 card-lift">
               <h3 className="font-display text-lg font-semibold tracking-tight text-ink">
                 {ind.name}
               </h3>
@@ -409,12 +561,15 @@ export default function HomePage() {
             title="13 years of earned opinions."
             subtitle="Practical, opinionated thinking on corporate event design, team building, and leadership development — for HR and L&D leaders."
           />
-          <Link href="/blog" className="hidden sm:inline-flex shrink-0 text-sm font-semibold text-ink hover:text-brand">
+          <Link
+            href="/blog"
+            className="hidden sm:inline-flex shrink-0 text-sm font-semibold text-ink hover:text-brand"
+          >
             All articles →
           </Link>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {BLOG_POSTS.map((p) => (
+          {BLOG_POSTS.slice(0, 6).map((p) => (
             <Card
               key={p.slug}
               href={`/blog/${p.slug}`}
@@ -454,5 +609,30 @@ export default function HomePage() {
         secondary={{ label: "WhatsApp us", href: "https://wa.me/919986058666" }}
       />
     </>
+  );
+}
+
+function Trust({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="flex gap-4">
+      <span className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand text-white">
+        <svg
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </span>
+      <div>
+        <div className="font-display text-[16px] font-semibold text-ink">{title}</div>
+        <p className="mt-1 text-[14px] text-ink-muted leading-relaxed">{body}</p>
+      </div>
+    </div>
   );
 }
