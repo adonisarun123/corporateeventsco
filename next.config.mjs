@@ -4,7 +4,6 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "plus.unsplash.com" },
-      { protocol: "https", hostname: "source.unsplash.com" },
     ],
     // Sizes Next/Image will pre-generate. Aligns with the breakpoints
     // we emit in srcsets so the browser fetches the smallest variant

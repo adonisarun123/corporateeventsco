@@ -131,11 +131,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        {/* DNS prefetch + preconnect to Unsplash CDNs for faster image hydration */}
+        {/* DNS prefetch + preconnect to Unsplash CDN for faster image hydration */}
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
-        <link rel="dns-prefetch" href="https://source.unsplash.com" />
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="" />
-        <link rel="preconnect" href="https://source.unsplash.com" crossOrigin="" />
 
         {/* Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

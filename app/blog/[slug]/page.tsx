@@ -159,7 +159,6 @@ export default function BlogPostPage({ params }: { params: Params }) {
             alt={post.title}
             className="h-full w-full object-cover"
             loading="eager"
-            fetchPriority="high"
             width={1600}
             height={800}
           />

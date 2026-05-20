@@ -214,7 +214,6 @@ export default function HomePage() {
                     alt="A facilitated corporate team workshop in India"
                     className="h-full w-full object-cover"
                     loading="eager"
-                    fetchPriority="high"
                     width={900}
                     height={1125}
                   />

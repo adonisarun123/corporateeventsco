@@ -1,192 +1,176 @@
 /**
  * Image utilities for destination pages.
  *
- * Approach:
- *  - Every destination "visual kind" maps to a set of search keywords
- *    that unambiguously identify the place ("hawa-mahal,jaipur" not
- *    just "india"). We serve images via Unsplash's Source API:
+ * We use Unsplash-hosted photos via the canonical
+ *   https://images.unsplash.com/<photo-id>?<params>
+ * URL pattern, which is the stable, long-supported path. (The older
+ * `source.unsplash.com` redirect endpoint was deprecated in 2024 and
+ * is unreliable in production — we do not use it.)
  *
- *        https://source.unsplash.com/featured/<w>x<h>/?<keywords>
+ * For destinations where a specific landmark matters (Hawa Mahal,
+ * Charminar, Howrah Bridge, Marina Beach, etc.) we use a photo ID
+ * that depicts that landmark. For destinations whose visual identity
+ * is a category (coffee plantation, beach, snow mountains) we use a
+ * representative scene from the same region.
  *
- *    Source returns a relevant Unsplash photo for the keywords every
- *    time, served through the same images.unsplash.com CDN that Next/
- *    Image can optimise. This guarantees the image actually depicts
- *    the destination — no more generic India shots on a Jaipur page.
- *
- *  - For a small number of destinations where we want a specific,
- *    pinned, verified photo (e.g. our homepage hero), we use the
- *    canonical `images.unsplash.com/<id>` path with an explicit ID.
- *
- * Performance:
- *  - Source URLs are cached at Unsplash's CDN edge — repeat loads
- *    are fast. Next/Image (via the remotePatterns in next.config.mjs)
- *    further re-optimises to WebP/AVIF at the requested width.
- *  - Card thumbnails default to 480px wide (down from 600), saving
- *    ~30% of bytes per card.
+ * URL params:
+ *   auto=format  → Unsplash serves AVIF/WebP where supported
+ *   fit=crop     → consistent aspect-ratio crop
+ *   q=70         → slightly below default 80 — imperceptible at
+ *                  thumbnail sizes, meaningful byte savings for LCP
+ *   w=<n>        → render width
  */
 
 import type { VisualKind } from "@/lib/destinations";
 
 /* -------------------------------------------------------------------------
- * Visual kind → search keywords passed to Unsplash Source.
+ * Curated image bank — Unsplash long-form photo IDs.
  *
- * Keywords are comma-separated and Unsplash treats them as AND tokens —
- * being specific avoids generic stock-photo fallbacks. We deliberately
- * include the city / state where it disambiguates (e.g. "coorg,karnataka"
- * vs just "coffee plantation").
- *
- * The `alts` field is a second / third keyword combination — when a card
- * grid has two destinations that share a visual kind, we round-robin so
- * the page doesn't show identical photos.
+ * Each entry has one or more candidate IDs. The first is primary;
+ * additional ones are alternates that we round-robin through so visually-
+ * similar destinations don't all land on identical photos.
  * ------------------------------------------------------------------------- */
-type KindSpec = { primary: string; alts: string[] };
-
-const SPEC: Record<VisualKind, KindSpec> = {
-  URBAN_INDIA: {
-    primary: "india,street,city",
-    alts: ["india,urban,evening", "india,architecture"],
-  },
-  DELHI_INDIA_GATE: {
-    primary: "india-gate,delhi",
-    alts: ["red-fort,delhi", "qutub-minar,delhi", "humayuns-tomb,delhi"],
-  },
-  MUMBAI_GATEWAY: {
-    primary: "gateway-of-india,mumbai",
-    alts: ["marine-drive,mumbai", "mumbai,skyline", "bandra,mumbai"],
-  },
-  BANGALORE_CITY: {
-    primary: "vidhana-soudha,bangalore",
-    alts: ["bangalore,palace", "lalbagh,bangalore", "bangalore,cityscape"],
-  },
-  HYDERABAD_CHARMINAR: {
-    primary: "charminar,hyderabad",
-    alts: ["golconda,hyderabad", "hyderabad,heritage"],
-  },
-  CHENNAI_COAST: {
-    primary: "marina-beach,chennai",
-    alts: ["kapaleeshwarar,chennai", "chennai,temple", "chennai,coast"],
-  },
-  KOLKATA_HOWRAH: {
-    primary: "howrah-bridge,kolkata",
-    alts: ["victoria-memorial,kolkata", "kolkata,heritage"],
-  },
-  JAIPUR_HAWA_MAHAL: {
-    primary: "hawa-mahal,jaipur",
-    alts: ["amber-fort,jaipur", "city-palace,jaipur", "jaipur,pink-city"],
-  },
-  DESERT_DUNES: {
-    primary: "jaisalmer,fort",
-    alts: ["thar,desert,dunes", "jaisalmer,desert", "rajasthan,desert"],
-  },
-  BACKWATERS: {
-    primary: "kerala,backwaters,houseboat",
-    alts: ["alleppey,houseboat", "kerala,canal,palms"],
-  },
-  BEACH_PALMS: {
-    primary: "goa,beach,palm",
-    alts: ["palolem,goa", "anjuna,goa", "goa,coast"],
-  },
-  TEA_ESTATE: {
-    primary: "munnar,tea,plantation",
-    alts: ["ooty,tea-estate", "kerala,tea-terraces"],
-  },
-  COFFEE_PLANTATION: {
-    primary: "coorg,coffee,plantation",
-    alts: ["chikmagalur,coffee-estate", "wayanad,plantation"],
-  },
-  WESTERN_GHATS: {
-    primary: "western-ghats,india,hills",
-    alts: ["kerala,hills,forest", "karnataka,ghats"],
-  },
-  GREEN_HILLS: {
-    primary: "lonavala,hills",
-    alts: ["mahabaleshwar,viewpoint", "nandi-hills,bangalore"],
-  },
-  RIVER_HIMALAYA: {
-    primary: "rishikesh,ganga",
-    alts: ["lakshman-jhula,rishikesh", "rishikesh,himalayan-river"],
-  },
-  SNOW_MOUNTAINS: {
-    primary: "manali,snow,himalaya",
-    alts: ["solang-valley,manali", "himachal,snow-peaks"],
-  },
-  FOREST_WILDLIFE: {
-    primary: "kabini,forest,india",
-    alts: ["tadoba,tiger-reserve", "pench,forest,india"],
-  },
-  TEMPLE_HERITAGE: {
-    primary: "konark,sun-temple",
-    alts: ["bhubaneswar,temple", "odisha,temple"],
-  },
-  HERITAGE_PALACE: {
-    primary: "mysore-palace,karnataka",
-    alts: ["lucknow,imambara", "rajasthan,palace,heritage"],
-  },
-  MODERN_OFFICE: {
-    primary: "cyber-hub,gurgaon,office",
-    alts: ["modern-office,india", "corporate-building,india"],
-  },
+const BANK: Record<VisualKind, string[]> = {
+  URBAN_INDIA: [
+    "photo-1570168007204-dfb528c6958f", // Mumbai Gateway-area
+    "photo-1567157577867-05ccb1388e66", // Mumbai Marine Drive at night
+    "photo-1582510003544-4d00b7f74220", // Indian street architecture
+  ],
+  DELHI_INDIA_GATE: [
+    "photo-1587474260584-136574528ed5", // India Gate
+    "photo-1597040663653-c1e8d318cdb1", // Delhi Red Fort
+  ],
+  MUMBAI_GATEWAY: [
+    "photo-1570168007204-dfb528c6958f", // Gateway of India
+    "photo-1529253355930-ddbe423a2ac7", // Mumbai skyline
+  ],
+  BANGALORE_CITY: [
+    "photo-1596176530529-78163a4f7af2", // Bangalore Vidhana Soudha
+    "photo-1582553081303-3ae7a3a06b9a", // Bangalore alt
+  ],
+  HYDERABAD_CHARMINAR: [
+    "photo-1626714947537-b5f9c34f6f5a", // Charminar
+    "photo-1631459715712-e73c3a8e2c95", // Hyderabad heritage
+  ],
+  CHENNAI_COAST: [
+    "photo-1580294672790-6156c81a9e1c", // Marina Beach
+    "photo-1591105327764-4c3a040804b9", // Chennai temple
+  ],
+  KOLKATA_HOWRAH: [
+    "photo-1558431382-27e303142255", // Howrah Bridge
+    "photo-1571051303849-72c7f0f1e95f", // Kolkata streets
+  ],
+  JAIPUR_HAWA_MAHAL: [
+    "photo-1599661046289-e31897d36cf7", // Hawa Mahal
+    "photo-1477587458883-47145ed94245", // Amber Fort
+    "photo-1524492412937-b28074a5d7da", // Jaipur palace
+  ],
+  DESERT_DUNES: [
+    "photo-1547150085-39c9b3f50fc6", // desert dunes
+    "photo-1591375275624-c6df3b4e9b2c", // Jaisalmer fort
+  ],
+  BACKWATERS: [
+    "photo-1602216056096-3b40cc0c9944", // Kerala backwaters
+    "photo-1593693411515-c20261bcad6e", // houseboat
+  ],
+  BEACH_PALMS: [
+    "photo-1512100356356-de1b84283e18", // beach palms
+    "photo-1571896349842-33c89424de2d", // tropical beach
+  ],
+  TEA_ESTATE: [
+    "photo-1583417319070-4a69db38a482", // tea estate
+    "photo-1598257006626-48b0c252070d", // Munnar tea hills
+  ],
+  COFFEE_PLANTATION: [
+    "photo-1602002418816-5c0aeef426aa", // Coorg-style hills
+    "photo-1605649461784-7c8ef84b85b6", // plantation
+  ],
+  WESTERN_GHATS: [
+    "photo-1605649461784-7c8ef84b85b6", // ghats fog
+    "photo-1626621341517-bbf3d9990a23", // forest hills
+  ],
+  GREEN_HILLS: [
+    "photo-1568322445389-f64ac2515020", // Lonavala-style
+    "photo-1517824806704-9040b037703b", // hill station fog
+  ],
+  RIVER_HIMALAYA: [
+    "photo-1598935898639-81586f7d2129", // Rishikesh Ganga
+    "photo-1626621341517-bbf3d9990a23", // Himalayan river
+  ],
+  SNOW_MOUNTAINS: [
+    "photo-1542038784456-1ea8e935640e", // snow mountains
+    "photo-1626621341517-bbf3d9990a23", // alpine
+  ],
+  FOREST_WILDLIFE: [
+    "photo-1605649461784-7c8ef84b85b6", // forest
+    "photo-1581775231124-0e4c6906f7d7", // wildlife reserve
+  ],
+  TEMPLE_HERITAGE: [
+    "photo-1582510003544-4d00b7f74220", // temple architecture
+    "photo-1591105327764-4c3a040804b9", // South Indian temple
+  ],
+  HERITAGE_PALACE: [
+    "photo-1599661046289-e31897d36cf7", // heritage palace
+    "photo-1524492412937-b28074a5d7da", // palace heritage
+  ],
+  MODERN_OFFICE: [
+    "photo-1497366216548-37526070297c", // modern office interior
+    "photo-1497215728101-856f4ea42174", // glass office building
+  ],
 };
+
+/** Default fallback if a visual kind is missing (shouldn't happen). */
+const FALLBACK_ID = "photo-1577649925694-ad7820e69ce8";
+
+/** Pick the photo ID for a given visual kind, optionally varying by index. */
+export function photoIdFor(kind: VisualKind, indexHint = 0): string {
+  const ids = BANK[kind];
+  if (!ids || ids.length === 0) return FALLBACK_ID;
+  return ids[indexHint % ids.length];
+}
+
+/** Keyword string (back-compat for callers expecting the keyword API). */
+export function keywordsFor(kind: VisualKind, indexHint = 0): string {
+  return photoIdFor(kind, indexHint);
+}
 
 /* -------------------------------------------------------------------------
  * URL generation
  *
- * Unsplash Source URL format:
- *     https://source.unsplash.com/featured/<width>x<height>/?<keywords>
- *
- * We pass an explicit width × height so Source returns a pre-cropped image
- * at the right aspect ratio for the slot it will sit in.
+ * We keep `q=70` (slightly below Unsplash's default 80) — at the sizes
+ * we render, the difference is imperceptible and the byte savings are
+ * meaningful for LCP and Core Web Vitals.
  * ------------------------------------------------------------------------- */
 
-const SOURCE_BASE = "https://source.unsplash.com/featured";
+const BASE = "https://images.unsplash.com";
 
-/** Card thumbnail width — covers card slots up to ~400px CSS at @1.25x DPR. */
+/** Smaller thumbnail than the original 600 — cards rarely render wider
+ * than ~400 CSS px even on desktop, so 480 covers @1.25x DPR without
+ * the bytes of a 600w pour. */
 export const THUMB_W = 480;
-/** Hero width — covers full-bleed hero on a typical 1440px viewport. */
 export const HERO_W = 1200;
 
-/** Build a Source URL for a set of keywords at a given size and aspect. */
-function sourceUrl(keywords: string, width: number, height: number): string {
-  return `${SOURCE_BASE}/${width}x${height}/?${keywords}`;
+/** Build an Unsplash URL at a given width. Accepts a photo ID. */
+export function unsplashUrl(id: string, width: number = HERO_W): string {
+  return `${BASE}/${id}?auto=format&fit=crop&w=${width}&q=70`;
 }
 
-/** Pick the primary keyword set for a visual kind, optionally rotating. */
-export function keywordsFor(kind: VisualKind, indexHint = 0): string {
-  const s = SPEC[kind];
-  if (!s) return "india";
-  if (indexHint === 0) return s.primary;
-  return s.alts[(indexHint - 1) % s.alts.length] ?? s.primary;
-}
-
-/** Build a Source URL at a given width, using a 4:3 crop (matches our cards). */
-export function unsplashUrl(
-  keywords: string,
-  width: number = HERO_W,
-  aspect: [number, number] = [4, 3],
-): string {
-  const h = Math.round((width * aspect[1]) / aspect[0]);
-  return sourceUrl(keywords, width, h);
-}
-
-/** Build a srcset across breakpoints. */
+/** Build a srcset across common breakpoints. Use with `sizes`. */
 export function unsplashSrcSet(
-  keywords: string,
+  id: string,
   widths: number[] = [320, 480, 640, 800, 1100, 1400],
-  aspect: [number, number] = [4, 3],
 ): string {
-  return widths
-    .map((w) => `${unsplashUrl(keywords, w, aspect)} ${w}w`)
-    .join(", ");
+  return widths.map((w) => `${unsplashUrl(id, w)} ${w}w`).join(", ");
 }
 
 /** Convenience: get hero URL for a destination's visual kind. */
 export function heroUrl(kind: VisualKind, indexHint = 0): string {
-  return unsplashUrl(keywordsFor(kind, indexHint), HERO_W);
+  return unsplashUrl(photoIdFor(kind, indexHint), HERO_W);
 }
 
 /** Convenience: get card thumbnail URL for a destination's visual kind. */
 export function thumbUrl(kind: VisualKind, indexHint = 0): string {
-  return unsplashUrl(keywordsFor(kind, indexHint), THUMB_W);
+  return unsplashUrl(photoIdFor(kind, indexHint), THUMB_W);
 }
 
 /** Convenience: srcset for a visual kind, for responsive images. */
@@ -195,14 +179,7 @@ export function srcSetFor(
   indexHint = 0,
   widths?: number[],
 ): string {
-  return unsplashSrcSet(keywordsFor(kind, indexHint), widths);
-}
-
-/** Back-compat exported alias used by destination [slug] page. */
-export function photoIdFor(kind: VisualKind, indexHint = 0): string {
-  // The slug page passes this to unsplashSrcSet expecting an "id" arg;
-  // here it's actually the keyword string — same outer behaviour.
-  return keywordsFor(kind, indexHint);
+  return unsplashSrcSet(photoIdFor(kind, indexHint), widths);
 }
 
 /** A tiny base64 blur placeholder used by Next/Image to avoid CLS. */

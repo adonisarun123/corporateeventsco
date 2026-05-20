@@ -191,7 +191,6 @@ export default function DestinationPage({ params }: { params: Params }) {
                   className="h-full w-full object-cover"
                   decoding="async"
                   loading="eager"
-                  fetchPriority="high"
                   width={1200}
                   height={900}
                 />
